@@ -5,22 +5,42 @@ import axios from "axios";
 export default function AddTask() {
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
-  const [recurrence, setrecurrence] = useState();
-  const [ponctuel, setPonctuel] = useState();
+  const [recurrence, setRecurrence] = useState();
+
   const [technicien, setTechnicien] = useState();
   const [client, setClient] = useState();
 
+  const log = console.log;
   ////---------------------Create task--------------------////
   const handleTask = () => {
     console.log("add Task");
-    // {
-    //   "title": "string",
-    //   "description": "string",
-    //   "recurrence": "string",
-    //   "ponctuel": "string",
-    //   "technicien": "string",
-    //   "client": "string"
-    // }
+    console.log(recurrence);
+    console.log(technicien);
+    console.log(title);
+    console.log(client);
+    console.log(description);
+
+    const obj = {
+      title: "string",
+      description: "string",
+      recurrence: "string",
+      ponctuel: "string",
+      technicien: "string",
+      client: "string",
+    };
+
+    // crée ticket POST-Request sent: /api/v1/tickets
+    //     {
+    //       "title": "Help me!",
+    //       "group": "2nd Level",
+    //       "customer": "david@example.com",
+    //       "article": {
+    //          "subject": "My subject",
+    //          "body": "I am a message!",
+    //          "type": "note",
+    //          "internal": false
+    //       }
+    //    }
   };
 
   //--------------------------STATE-------------------------//
@@ -38,17 +58,15 @@ export default function AddTask() {
       });
   }, []);
 
-  if (list !== null) {
-    console.log(list);
-  }
-
-  console.log(technicien);
+  // if (list !== null) {
+  //   console.log(list);
+  // }
 
   return (
     <>
       <button
         type="button"
-        class="btn btn-light"
+        className="btn btn-light"
         data-toggle="modal"
         data-target="#exampleModal"
         onClick={handleTask}
@@ -57,65 +75,71 @@ export default function AddTask() {
       </button>
 
       <div
-        class="modal fade"
+        className="modal fade"
         id="exampleModal"
-        tabindex="-1"
+        tabIndex="-1"
         role="dialog"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="exampleModalLabel">
                 Nouvelle Tâche
               </h5>
               <button
                 type="button"
-                class="close"
+                className="close"
                 data-dismiss="modal"
                 aria-label="Close"
               >
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div class="modal-body">
+            <div className="modal-body">
               <form>
-                <div class="form-group">
-                  <label for="exampleFormControlSelect1">Technicien</label>
+                <div className="form-group">
+                  <label htmlFor="exampleFormControlSelect1">Technicien</label>
                   <select
-                    class="form-control"
+                    className="form-control"
                     id="exampleFormControlSelect1"
                     onChange={(e) => {
                       setTechnicien(e.target.value);
                     }}
                   >
                     {list?.map((item) => {
-                      return <option> {item.name} </option>;
+                      return <option key={item.id}> {item.name} </option>;
                     })}
                   </select>
                 </div>
-                <div class="form-group">
-                  <label for="exampleFormControlSelect1">Client</label>
-                  <select class="form-control" id="exampleFormControlSelect1">
+                <div className="form-group">
+                  <label htmlFor="exampleFormControlSelect1">Client</label>
+                  <select
+                    className="form-control"
+                    id="exampleFormControlSelect1"
+                    onChange={(e) => {
+                      setClient(e.target.value);
+                    }}
+                  >
                     <option>Ifr</option>
                     <option>Garage</option>
                     <option>orange</option>
                   </select>
                 </div>
-                <div class="form-group">
+                {/* <div className="form-group">
                   <label for="exampleFormControlSelect1">Appareil</label>
-                  <select class="form-control" id="exampleFormControlSelect1">
+                  <select className="form-control" id="exampleFormControlSelect1">
                     <option>Ifr</option>
                     <option>Garage</option>
                     <option>orange</option>
                   </select>
-                </div>
-                <div class="form-group">
-                  <label Htmlfor="exampleFormControlInput1">Titre</label>
+                </div> */}
+                <div className="form-group">
+                  <label htmlFor="exampleFormControlInput1">Titre</label>
                   <input
                     type="text"
-                    class="form-control"
+                    className="form-control"
                     id="exampleFormControlInput1"
                     placeholder="ifr..."
                     onChange={(e) => {
@@ -124,11 +148,11 @@ export default function AddTask() {
                   />
                 </div>
 
-                <div class="form-group">
-                  <label Htmlfor="exampleFormControlInput1">Description</label>
+                <div className="form-group">
+                  <label htmlFor="exampleFormControlInput1">Description</label>
                   <textarea
                     type="email"
-                    class="form-control"
+                    className="form-control"
                     id="exampleFormControlInput1"
                     placeholder="maintenance chez ifr...."
                     onChange={(e) => {
@@ -136,26 +160,35 @@ export default function AddTask() {
                     }}
                   />
                 </div>
-                <div class="form-group">
-                  <label Htmlfor="exampleFormControlInput1">date</label>
+                <div className="form-group">
+                  <label htmlFor="exampleFormControlInput1">récurrence</label>
                   <input
-                    type="date"
-                    class="form-control"
-                    id="exampleFormControlInput1"
-                    placeholder="ifr..."
+                    type="number"
+                    className="form-control form-control-solid"
+                    placeholder="Choisissez le nombre de jours"
+                    min="0"
+                    max="100"
+                    id="recurrence"
+                    onChange={(e) => {
+                      setRecurrence(e.target.value);
+                    }}
                   />
                 </div>
               </form>
             </div>
-            <div class="modal-footer">
+            <div className="modal-footer">
               <button
                 type="button"
-                class="btn btn-secondary"
+                className="btn btn-secondary"
                 data-dismiss="modal"
               >
                 Annuler
               </button>
-              <button type="button" class="btn btn-primary">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleTask}
+              >
                 Valider
               </button>
             </div>

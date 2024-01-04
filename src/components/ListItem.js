@@ -17,9 +17,6 @@ export default function ListItem() {
       });
   }, []);
 
-  if (list !== null) {
-    console.log(list);
-  }
   return (
     <>
       <section className="vh-100 gradient-custom-2">
@@ -44,7 +41,7 @@ export default function ListItem() {
                           <tr className="fw-normal" key={item.id}>
                             <th>
                               <img
-                                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                                src="./assets/images/logo.png"
                                 alt="avatar 1"
                                 style={{ width: "45px", height: "auto" }}
                               />

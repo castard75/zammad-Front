@@ -4,65 +4,65 @@ import AddTask from "./AddTask";
 export default function Navbar() {
   return (
     <>
-      <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
-        <div class="container-fluid">
+      <nav className="navbar navbar-expand-lg navbar-light bg-body-tertiary">
+        <div className="container-fluid">
           <button
             data-mdb-collapse-init
-            class="navbar-toggler"
+            className="navbar-toggler"
             type="button"
             data-mdb-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent"
             aria-expanded="false"
             aria-label="Toggle navigation"
           >
-            <i class="fas fa-bars"></i>
+            <i className="fas fa-bars"></i>
           </button>
 
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <a class="navbar-brand mt-2 mt-lg-0" href="#">
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            <a className="navbar-brand mt-2 mt-lg-0" href="#">
               Nixia
             </a>
 
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              {/* <li class="nav-item">
-                <a class="nav-link" href="#">
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+              {/* <li className="nav-item">
+                <a className="nav-link" href="#">
                   Accueil
                 </a>
               </li> */}
-              <li class="nav-item">
+              <li className="nav-item">
                 <AddTask />
               </li>
             </ul>
           </div>
 
-          <div class="d-flex align-items-center">
-            <div class="dropdown">
+          <div className="d-flex align-items-center">
+            <div className="dropdown">
               <ul
-                class="dropdown-menu dropdown-menu-end"
+                className="dropdown-menu dropdown-menu-end"
                 aria-labelledby="navbarDropdownMenuLink"
               >
                 <li>
-                  <a class="dropdown-item" href="#">
+                  <a className="dropdown-item" href="#">
                     Some news
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#">
+                  <a className="dropdown-item" href="#">
                     Another news
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#">
+                  <a className="dropdown-item" href="#">
                     Something else here
                   </a>
                 </li>
               </ul>
             </div>
 
-            <div class="dropdown">
+            <div className="dropdown">
               <a
                 data-mdb-dropdown-init
-                class="dropdown-toggle d-flex align-items-center hidden-arrow"
+                className="dropdown-toggle d-flex align-items-center hidden-arrow"
                 href="#"
                 id="navbarDropdownMenuAvatar"
                 role="button"
@@ -70,28 +70,28 @@ export default function Navbar() {
               >
                 <img
                   src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
-                  class="rounded-circle"
+                  className="rounded-circle"
                   height="25"
                   alt="Black and White Portrait of a Man"
                   loading="lazy"
                 />
               </a>
               <ul
-                class="dropdown-menu dropdown-menu-end"
+                className="dropdown-menu dropdown-menu-end"
                 aria-labelledby="navbarDropdownMenuAvatar"
               >
                 <li>
-                  <a class="dropdown-item" href="#">
+                  <a className="dropdown-item" href="#">
                     My profile
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#">
+                  <a className="dropdown-item" href="#">
                     Settings
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#">
+                  <a className="dropdown-item" href="#">
                     Logout
                   </a>
                 </li>
