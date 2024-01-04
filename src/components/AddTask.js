@@ -6,28 +6,39 @@ export default function AddTask() {
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
   const [recurrence, setRecurrence] = useState();
-
+  const [date, setDate] = useState();
   const [technicien, setTechnicien] = useState();
   const [client, setClient] = useState();
 
-  const log = console.log;
   ////---------------------Create task--------------------////
-  const handleTask = () => {
+
+  const makeTask = () => {
     console.log("add Task");
-    console.log(recurrence);
-    console.log(technicien);
-    console.log(title);
-    console.log(client);
-    console.log(description);
+    console.log(date);
 
     const obj = {
-      title: "string",
-      description: "string",
-      recurrence: "string",
-      ponctuel: "string",
-      technicien: "string",
-      client: "string",
+      title: title,
+      description: description,
+      recurrence: recurrence,
+      date: date,
+      technicien: technicien,
+      client: client,
     };
+
+    // console.log(obj);
+
+    axios
+      .post("https://localhost:8000/api/tasks", obj, {
+        headers: {
+          "Content-Type": "application/ld+json",
+        },
+      })
+      .then((res) => {
+        console.log("Réponse du serveur :", res.data);
+      })
+      .catch((err) => {
+        console.error("Erreur lors de la requête :", err);
+      });
 
     // crée ticket POST-Request sent: /api/v1/tickets
     //     {
@@ -61,6 +72,9 @@ export default function AddTask() {
   // if (list !== null) {
   //   console.log(list);
   // }
+  const initDefaultValue = () => {
+    setTechnicien(list[0].name);
+  };
 
   return (
     <>
@@ -69,7 +83,7 @@ export default function AddTask() {
         className="btn btn-light"
         data-toggle="modal"
         data-target="#exampleModal"
-        onClick={handleTask}
+        onClick={initDefaultValue}
       >
         Nouvelle tâche
       </button>
@@ -104,8 +118,13 @@ export default function AddTask() {
                   <select
                     className="form-control"
                     id="exampleFormControlSelect1"
+                    selected={list.length > 0 ? list[0].name : ""}
                     onChange={(e) => {
-                      setTechnicien(e.target.value);
+                      const selectedValue =
+                        e.target.value === undefined
+                          ? list[0].name
+                          : e.target.value;
+                      setTechnicien(selectedValue);
                     }}
                   >
                     {list?.map((item) => {
@@ -127,14 +146,7 @@ export default function AddTask() {
                     <option>orange</option>
                   </select>
                 </div>
-                {/* <div className="form-group">
-                  <label for="exampleFormControlSelect1">Appareil</label>
-                  <select className="form-control" id="exampleFormControlSelect1">
-                    <option>Ifr</option>
-                    <option>Garage</option>
-                    <option>orange</option>
-                  </select>
-                </div> */}
+
                 <div className="form-group">
                   <label htmlFor="exampleFormControlInput1">Titre</label>
                   <input
@@ -157,6 +169,20 @@ export default function AddTask() {
                     placeholder="maintenance chez ifr...."
                     onChange={(e) => {
                       setDescription(e.target.value);
+                    }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="exampleFormControlInput1">récurrence</label>
+                  <input
+                    type="date"
+                    className="form-control form-control-solid"
+                    placeholder="Choisissez le nombre de jours"
+                    min="0"
+                    max="100"
+                    id="recurrence"
+                    onChange={(e) => {
+                      setDate(e.target.value);
                     }}
                   />
                 </div>
@@ -187,7 +213,7 @@ export default function AddTask() {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={handleTask}
+                onClick={makeTask}
               >
                 Valider
               </button>

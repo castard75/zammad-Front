@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 
 export default function ListItem() {
   const [list, setList] = useState([]);
+  const [showModal, setShowModal] = useState(false); // New state for controlling modal visibility
+  const [selectedItem, setSelectedItem] = useState(null); // New state to store the selected item
 
   useEffect(() => {
     const fetchDatas = axios
@@ -16,6 +18,22 @@ export default function ListItem() {
         console.log(err);
       });
   }, []);
+
+  const viewDetails = (id) => {
+    console.log(id);
+
+    const findObjList = list.find((el) => el.id === id);
+
+    console.log(findObjList);
+
+    setSelectedItem(findObjList);
+    console.log(findObjList);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
 
   return (
     <>
@@ -30,7 +48,7 @@ export default function ListItem() {
                       <tr>
                         <th scope="col">Technicien</th>
                         <th scope="col">Client</th>
-                        <th scope="col">Task</th>
+                        <th scope="col">Tâche</th>
                         <th scope="col">Status</th>
                         <th scope="col">Actions</th>
                       </tr>
@@ -45,13 +63,13 @@ export default function ListItem() {
                                 alt="avatar 1"
                                 style={{ width: "45px", height: "auto" }}
                               />
-                              <span className="ms-2">{item.title}</span>
+                              <span className="ms-2">{item.technicien}</span>
                             </th>
                             <td className="align-middle">
                               <span>Ifr</span>
                             </td>
                             <td className="align-middle">
-                              <span>Maintenance</span>
+                              <span>{item.title}</span>
                             </td>
                             <td className="align-middle">
                               <h6 className="mb-0">
@@ -60,21 +78,33 @@ export default function ListItem() {
                                 </span>
                               </h6>
                             </td>
-                            <td className="align-middle">
-                              <a
-                                href="#!"
-                                data-mdb-toggle="tooltip"
-                                title="Done"
+                            <td
+                              className="align-middle"
+                              onClick={() => viewDetails(item.id)}
+                            >
+                              <button
+                                type="button"
+                                className="btn btn-primary"
+                                data-toggle="modal"
+                                data-target="#detail"
                               >
-                                <i className="fas fa-check fa-lg text-success me-3"></i>
-                              </a>
-                              <a
+                                details
+                                {/* <a
+                                  href="#!"
+                                  data-mdb-toggle="tooltip"
+                                  title="Done"
+                                >
+                                  <i className="fa-solid fa-eye"></i>
+                                </a> */}
+                              </button>
+
+                              {/* <a
                                 href="#!"
                                 data-mdb-toggle="tooltip"
                                 title="Remove"
                               >
                                 <i className="fas fa-trash-alt fa-lg text-warning"></i>
-                              </a>
+                              </a> */}
                             </td>
                           </tr>
                         );
@@ -87,6 +117,65 @@ export default function ListItem() {
           </div>
         </div>
       </section>
+      <div
+        className={`modal fade ${showModal ? "show" : ""}`}
+        id="detail"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="details"
+        aria-hidden={!showModal}
+        style={{ display: showModal ? "block" : "none" }}
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="exampleModalLabel">
+                Details
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <h6>Objet : </h6> {selectedItem?.title}
+                </li>
+                <li class="list-group-item">
+                  <h6>Technicien : </h6> {selectedItem?.technicien}
+                </li>
+                <li class="list-group-item">
+                  <h6>Description : </h6> {selectedItem?.subject}
+                </li>
+                <li class="list-group-item">
+                  <h6>recurrence : </h6> {selectedItem?.date.split("T")[0]}
+                </li>
+                <li class="list-group-item">
+                  <h6>recurrence : </h6> {selectedItem?.recurrence}
+                </li>
+              </ul>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={closeModal}
+              >
+                Close
+              </button>
+              <button type="button" className="btn btn-primary">
+                Save changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      ;
     </>
   );
 }
