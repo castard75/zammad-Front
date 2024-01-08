@@ -6,7 +6,26 @@ export default function ListItem() {
   const [list, setList] = useState([]);
   const [showModal, setShowModal] = useState(false); // New state for controlling modal visibility
   const [selectedItem, setSelectedItem] = useState(null); // New state to store the selected item
+  const [showUpdate, setShowUpdate] = useState(false);
 
+  ////----------STATE UPDATE----------////
+  const [technicien, setTechnicien] = useState("");
+  const [client, setClient] = useState("");
+  const [allClients, setAllClients] = useState([]);
+  const [allTechniciens, setAllTechniens] = useState([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [recurrence, setRecurrence] = useState();
+  const [itemToUpdate, setItemToUpdate] = useState({
+    title: "",
+    description: "",
+    recurrence: "",
+    technicien: "",
+    client: "",
+    status: 0,
+  });
+
+  ////-------------------TACHE-------------------------////
   useEffect(() => {
     const fetchDatas = axios
       .get("https://localhost:8000/api/tasks")
@@ -19,20 +38,70 @@ export default function ListItem() {
       });
   }, []);
 
+  ////-----------------TECHNICIENS------------------////
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Requête pour les techniciens
+        const techniciensRes = await axios.get(
+          "https://localhost:8000/api/techniciens"
+        );
+        const techniciensData = techniciensRes.data["hydra:member"];
+        setAllTechniens(techniciensData);
+
+        // Requête pour les clients
+        const clientsRes = await axios.get(
+          "https://localhost:8000/api/clients"
+        );
+        const clientsData = clientsRes.data["hydra:member"];
+        console.log(clientsData);
+        setAllClients(clientsData);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des données:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  ////------------------DETAILS---------------------////
+
   const viewDetails = (id) => {
-    console.log(id);
-
     const findObjList = list.find((el) => el.id === id);
-
-    console.log(findObjList);
-
     setSelectedItem(findObjList);
     console.log(findObjList);
     setShowModal(true);
+    setTechnicien(findObjList.technicien);
+    setClient(findObjList.client);
   };
 
+  ////-------------UPDATE-----------------////
+  const handleUpdate = () => {
+    setShowUpdate(true);
+  };
+
+  ////-------------close modal------------////
   const closeModal = () => {
-    setShowModal(false);
+    // setShowModal(false);
+    setShowUpdate(false);
+  };
+
+  const handleChange = () => {
+    console.log(selectedItem.id);
+    console.log(technicien);
+    console.log(title);
+    console.log(client);
+    console.log(description);
+    console.log(recurrence);
+    // const obj = {
+    //   title: title,
+    //   description: description,
+    //   recurrence: recurrence,
+    //   technicien: technicien,
+    //   client: client,
+    // };
+
+    // axios.put(`https://localhost:8000/api/tasks/${selectedItem.id}`,)
   };
 
   return (
@@ -66,7 +135,7 @@ export default function ListItem() {
                               <span className="ms-2">{item.technicien}</span>
                             </th>
                             <td className="align-middle">
-                              <span>Ifr</span>
+                              <span>{item.client}</span>
                             </td>
                             <td className="align-middle">
                               <span>{item.title}</span>
@@ -89,22 +158,7 @@ export default function ListItem() {
                                 data-target="#detail"
                               >
                                 details
-                                {/* <a
-                                  href="#!"
-                                  data-mdb-toggle="tooltip"
-                                  title="Done"
-                                >
-                                  <i className="fa-solid fa-eye"></i>
-                                </a> */}
                               </button>
-
-                              {/* <a
-                                href="#!"
-                                data-mdb-toggle="tooltip"
-                                title="Remove"
-                              >
-                                <i className="fas fa-trash-alt fa-lg text-warning"></i>
-                              </a> */}
                             </td>
                           </tr>
                         );
@@ -129,48 +183,181 @@ export default function ListItem() {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">
-                Details
-              </h5>
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  aria-label="edit"
+                  onClick={handleUpdate}
+                >
+                  <span> Modifié</span>
+                </button>
+              </div>
+
               <button
                 type="button"
-                className="close"
+                className="close btn btn-secondary"
                 data-dismiss="modal"
                 aria-label="Close"
+                onClick={closeModal}
               >
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                  <h6>Objet : </h6> {selectedItem?.title}
-                </li>
-                <li class="list-group-item">
-                  <h6>Technicien : </h6> {selectedItem?.technicien}
-                </li>
-                <li class="list-group-item">
-                  <h6>Description : </h6> {selectedItem?.subject}
-                </li>
-                <li class="list-group-item">
-                  <h6>recurrence : </h6> {selectedItem?.date.split("T")[0]}
-                </li>
-                <li class="list-group-item">
-                  <h6>recurrence : </h6> {selectedItem?.recurrence}
-                </li>
-              </ul>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={closeModal}
-              >
-                Close
-              </button>
-              <button type="button" className="btn btn-primary">
-                Save changes
-              </button>
+              {!showUpdate ? (
+                <>
+                  <ul className="list-group list-group-flush">
+                    <li className="list-group-item">
+                      <h6>Objet : </h6> {selectedItem?.title}
+                    </li>
+                    <li className="list-group-item">
+                      <h6>Client : </h6> {selectedItem?.client}
+                    </li>
+                    <li className="list-group-item">
+                      <h6>Technicien : </h6> {selectedItem?.technicien}
+                    </li>
+
+                    <li className="list-group-item">
+                      <h6>Description : </h6> {selectedItem?.subject}
+                    </li>
+
+                    <li className="list-group-item">
+                      <h6>recurrence : </h6> {selectedItem?.recurrence}
+                    </li>
+                  </ul>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={closeModal}
+                    >
+                      Annuler
+                    </button>
+                    <button type="button" className="btn btn-primary">
+                      Valider
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <ul className="list-group list-group-flush">
+                    <li className="list-group-item">
+                      <h6 htmlFor="exampleFormControlSelect1">Titre</h6>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="exampleFormControlInput1"
+                        placeholder="ifr..."
+                        defaultValue={selectedItem?.title}
+                        onChange={(e) => {
+                          const selectedValue =
+                            e.target.value === undefined
+                              ? selectedItem?.title
+                              : e.target.value;
+                          setTitle(selectedValue);
+                        }}
+                      />
+                    </li>
+                    <li className="list-group-item">
+                      <h6 htmlFor="exampleFormControlSelect1">Technicien</h6>
+                      <select
+                        className="form-control"
+                        id="exampleFormControlSelect1"
+                        value={technicien}
+                        onChange={(e) => {
+                          const selectedValue =
+                            e.target.value === undefined
+                              ? selectedItem?.technicien
+                              : e.target.value;
+                          setTechnicien(selectedValue);
+                        }}
+                      >
+                        {allTechniciens?.map((item) => (
+                          <option key={item.id} value={item.name}>
+                            {item.name}
+                          </option>
+                        ))}
+                      </select>
+                    </li>
+                    <li className="list-group-item">
+                      <label htmlFor="exampleFormControlSelect1">Client</label>
+                      <select
+                        className="form-control"
+                        id="exampleFormControlSelect1"
+                        value={client}
+                        onChange={(e) => {
+                          const selectedValue =
+                            e.target.value === undefined
+                              ? selectedItem?.client
+                              : e.target.value;
+                          setClient(selectedValue);
+                        }}
+                      >
+                        {allClients?.map((item) => {
+                          return (
+                            <option key={item.id} value={item.name}>
+                              {item.name}{" "}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </li>
+                    <li className="list-group-item">
+                      <h6 htmlFor="exampleFormControlInput1">Description</h6>
+                      <textarea
+                        type="email"
+                        className="form-control"
+                        id="exampleFormControlInput1"
+                        placeholder="maintenance chez ifr...."
+                        defaultValue={selectedItem?.subject}
+                        onChange={(e) => {
+                          const selectedValue =
+                            e.target.value === undefined
+                              ? selectedItem?.subject
+                              : e.target.value;
+                          setDescription(selectedValue);
+                        }}
+                      />
+                    </li>
+                    <li className="list-group-item">
+                      <h6 htmlFor="exampleFormControlInput1">récurrence</h6>
+                      <input
+                        type="number"
+                        className="form-control form-control-solid"
+                        placeholder="Choisissez le nombre de jours"
+                        min="0"
+                        max="100"
+                        id="recurrence"
+                        defaultValue={selectedItem?.recurrence}
+                        onChange={(e) => {
+                          const selectedValue =
+                            e.target.value === undefined
+                              ? selectedItem?.recurrence
+                              : e.target.value;
+                          setRecurrence(selectedValue);
+                        }}
+                      />
+                    </li>
+                  </ul>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={closeModal}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleChange}
+                    >
+                      Valider Modification
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

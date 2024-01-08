@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 
 export default function AddTask() {
@@ -9,7 +9,7 @@ export default function AddTask() {
   const [date, setDate] = useState();
   const [technicien, setTechnicien] = useState();
   const [client, setClient] = useState();
-
+  const [allClients, setAllClients] = useState([]);
   ////---------------------Create task--------------------////
 
   const makeTask = () => {
@@ -18,27 +18,28 @@ export default function AddTask() {
 
     const obj = {
       title: title,
-      description: description,
+      subject: description,
       recurrence: recurrence,
-      date: date,
       technicien: technicien,
       client: client,
+      status: 0,
     };
 
     // console.log(obj);
 
-    axios
-      .post("https://localhost:8000/api/tasks", obj, {
-        headers: {
-          "Content-Type": "application/ld+json",
-        },
-      })
-      .then((res) => {
-        console.log("Réponse du serveur :", res.data);
-      })
-      .catch((err) => {
-        console.error("Erreur lors de la requête :", err);
-      });
+    // axios
+    //   .post("https://localhost:8000/api/tasks", obj, {
+    //     headers: {
+    //       "Content-Type": "application/ld+json",
+    //     },
+    //   })
+    //   .then((res) => {
+    //     console.log("Réponse du serveur :", res.data);
+    //     window.location = "/";
+    //   })
+    //   .catch((err) => {
+    //     console.error("Erreur lors de la requête :", err);
+    //   });
 
     // crée ticket POST-Request sent: /api/v1/tickets
     //     {
@@ -57,24 +58,48 @@ export default function AddTask() {
   //--------------------------STATE-------------------------//
   const [list, setList] = useState([]);
 
+  // useEffect(() => {
+  //   const fetchDatas = axios
+  //     .get("https://localhost:8000/api/techniciens")
+  //     .then((res) => {
+  //       const data = res.data["hydra:member"];
+  //       setList(data);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // }, []);
+
   useEffect(() => {
-    const fetchDatas = axios
-      .get("https://localhost:8000/api/techniciens")
-      .then((res) => {
-        const data = res.data["hydra:member"];
-        setList(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const fetchData = async () => {
+      try {
+        // Requête pour les techniciens
+        const techniciensRes = await axios.get(
+          "https://localhost:8000/api/techniciens"
+        );
+        const techniciensData = techniciensRes.data["hydra:member"];
+        setList(techniciensData);
+
+        // Requête pour les clients
+        const clientsRes = await axios.get(
+          "https://localhost:8000/api/clients"
+        );
+        const clientsData = clientsRes.data["hydra:member"];
+        console.log(clientsData);
+        setAllClients(clientsData);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des données:", err);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  // if (list !== null) {
-  //   console.log(list);
-  // }
-  const initDefaultValue = () => {
+  const initDefaultValue = useMemo(() => {
     setTechnicien(list[0].name);
-  };
+    setClient(allClients[0].name);
+    console.log("init");
+  }, []);
 
   return (
     <>
@@ -138,12 +163,16 @@ export default function AddTask() {
                     className="form-control"
                     id="exampleFormControlSelect1"
                     onChange={(e) => {
-                      setClient(e.target.value);
+                      const selectedValue =
+                        e.target.value === undefined
+                          ? list[0].name
+                          : e.target.value;
+                      setClient(selectedValue);
                     }}
                   >
-                    <option>Ifr</option>
-                    <option>Garage</option>
-                    <option>orange</option>
+                    {allClients?.map((item) => {
+                      return <option key={item.id}> {item.name} </option>;
+                    })}
                   </select>
                 </div>
 
@@ -172,7 +201,7 @@ export default function AddTask() {
                     }}
                   />
                 </div>
-                <div className="form-group">
+                {/* <div className="form-group">
                   <label htmlFor="exampleFormControlInput1">récurrence</label>
                   <input
                     type="date"
@@ -185,7 +214,7 @@ export default function AddTask() {
                       setDate(e.target.value);
                     }}
                   />
-                </div>
+                </div> */}
                 <div className="form-group">
                   <label htmlFor="exampleFormControlInput1">récurrence</label>
                   <input
