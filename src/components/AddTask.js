@@ -48,6 +48,8 @@ export default function AddTask() {
       clientEmail: findClient?.email,
       technicienEmail: findTechnicien?.email,
       groupId: findGroup?.zammadId,
+      groupZad: findGroup?.name,
+
       status: 0,
     };
 
@@ -215,7 +217,6 @@ export default function AddTask() {
                 <div className="form-group">
                   <label htmlFor="exampleFormControlSelect1">GROUPE</label>
                   <select
-                    value={client}
                     className="form-control"
                     id="exampleFormControlSelect1"
                     {...register("group", { required: false })}

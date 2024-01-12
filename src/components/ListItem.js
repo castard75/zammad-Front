@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 
 export default function ListItem() {
   const [list, setList] = useState([]);
@@ -16,6 +17,8 @@ export default function ListItem() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [recurrence, setRecurrence] = useState();
+  const [allGroup, setAllGroup] = useState([]);
+  const [group, setGroup] = useState([]);
   const [itemToUpdate, setItemToUpdate] = useState({
     title: "",
     description: "",
@@ -24,6 +27,21 @@ export default function ListItem() {
     client: "",
     status: 0,
   });
+
+  ////-------------------------REF----------------------////
+
+  const titleInputRef = useRef(null);
+  const recurrenceInputRef = useRef(null);
+  const descriptionInputRef = useRef(null);
+  const clientInputRef = useRef(null);
+  const technicienInputRef = useRef(null);
+  const groupInputRef = useRef(null);
+
+  ////----------------------VALIDATION FORM------------------------////
+
+  const { register, handleSubmit, formState } = useForm({});
+
+  const { errors } = formState;
 
   ////-------------------TACHE-------------------------////
   useEffect(() => {
@@ -39,6 +57,7 @@ export default function ListItem() {
   }, []);
 
   ////-----------------TECHNICIENS------------------////
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -56,6 +75,11 @@ export default function ListItem() {
         const clientsData = clientsRes.data["hydra:member"];
         console.log(clientsData);
         setAllClients(clientsData);
+
+        const groupRes = await axios.get("https://localhost:8000/api/groups");
+        const groupData = groupRes.data["hydra:member"];
+        // console.log(clientsData);
+        setAllGroup(groupData);
       } catch (err) {
         console.error("Erreur lors de la récupération des données:", err);
       }
@@ -68,11 +92,14 @@ export default function ListItem() {
 
   const viewDetails = (id) => {
     const findObjList = list.find((el) => el.id === id);
+
     setSelectedItem(findObjList);
     console.log(findObjList);
+
     setShowModal(true);
     setTechnicien(findObjList.technicien);
     setClient(findObjList.client);
+    setGroup(findObjList.groupZad);
   };
 
   ////-------------UPDATE-----------------////
@@ -86,22 +113,54 @@ export default function ListItem() {
     setShowUpdate(false);
   };
 
-  const handleChange = () => {
-    console.log(selectedItem.id);
-    console.log(technicien);
-    console.log(title);
-    console.log(client);
-    console.log(description);
-    console.log(recurrence);
-    // const obj = {
-    //   title: title,
-    //   description: description,
-    //   recurrence: recurrence,
-    //   technicien: technicien,
-    //   client: client,
-    // };
+  ////---------------HANDLE CHANGE----------------------////
 
-    // axios.put(`https://localhost:8000/api/tasks/${selectedItem.id}`,)
+  const handleChange = () => {
+    const title = titleInputRef.current.value;
+    const description = descriptionInputRef.current.value;
+    const recurrence = recurrenceInputRef.current.value;
+    const selectedTech = technicienInputRef.current.value;
+    const selectedClient = clientInputRef.current.value;
+    const selectedGroup = groupInputRef.current.value;
+
+    const findTechnicien = allTechniciens.find((el) => {
+      return el.name == selectedTech;
+    });
+
+    const findClient = allClients.find((el) => {
+      return el.name == selectedClient;
+    });
+
+    const findGroup = allGroup.find((el) => {
+      return el.name == selectedGroup;
+    });
+
+    const obj = {
+      title: title,
+      description: description,
+      recurrence: recurrence,
+      technicien: technicien,
+      client: client,
+      clientEmail: findClient?.email,
+      technicienEmail: findTechnicien?.email,
+      groupId: findGroup.zammadId,
+      group: selectedGroup,
+    };
+    console.log(obj);
+
+    axios
+      .put(`https://localhost:8000/api/tasks/${selectedItem.id}`, obj, {
+        headers: {
+          "Content-Type": "application/ld+json",
+        },
+      })
+      .then((response) => {
+        console.log(response.data);
+        window.location = "/";
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
@@ -223,6 +282,10 @@ export default function ListItem() {
                     </li>
 
                     <li className="list-group-item">
+                      <h6>GROUPE : </h6> {selectedItem?.groupZad}
+                    </li>
+
+                    <li className="list-group-item">
                       <h6>recurrence : </h6> {selectedItem?.recurrence}
                     </li>
                   </ul>
@@ -248,6 +311,7 @@ export default function ListItem() {
                         type="text"
                         className="form-control"
                         id="exampleFormControlInput1"
+                        ref={titleInputRef}
                         placeholder="ifr..."
                         defaultValue={selectedItem?.title}
                         onChange={(e) => {
@@ -265,6 +329,7 @@ export default function ListItem() {
                         className="form-control"
                         id="exampleFormControlSelect1"
                         value={technicien}
+                        ref={technicienInputRef}
                         onChange={(e) => {
                           const selectedValue =
                             e.target.value === undefined
@@ -285,6 +350,7 @@ export default function ListItem() {
                       <select
                         className="form-control"
                         id="exampleFormControlSelect1"
+                        ref={clientInputRef}
                         value={client}
                         onChange={(e) => {
                           const selectedValue =
@@ -304,12 +370,37 @@ export default function ListItem() {
                       </select>
                     </li>
                     <li className="list-group-item">
+                      <label htmlFor="exampleFormControlSelect1">Group</label>
+                      <select
+                        className="form-control"
+                        id="exampleFormControlSelect1"
+                        ref={groupInputRef}
+                        value={group}
+                        onChange={(e) => {
+                          const selectedValue =
+                            e.target.value === undefined
+                              ? selectedItem?.groupId
+                              : e.target.value;
+                          setGroup(selectedValue);
+                        }}
+                      >
+                        {allGroup?.map((item) => {
+                          return (
+                            <option key={item.id} value={item.name}>
+                              {item.name}{" "}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </li>
+                    <li className="list-group-item">
                       <h6 htmlFor="exampleFormControlInput1">Description</h6>
                       <textarea
                         type="email"
                         className="form-control"
                         id="exampleFormControlInput1"
                         placeholder="maintenance chez ifr...."
+                        ref={descriptionInputRef}
                         defaultValue={selectedItem?.description}
                         onChange={(e) => {
                           const selectedValue =
@@ -328,6 +419,7 @@ export default function ListItem() {
                         placeholder="Choisissez le nombre de jours"
                         min="0"
                         max="100"
+                        ref={recurrenceInputRef}
                         id="recurrence"
                         defaultValue={selectedItem?.recurrence}
                         onChange={(e) => {
