@@ -118,7 +118,7 @@ export default function ListItem() {
                         <th scope="col">Technicien</th>
                         <th scope="col">Client</th>
                         <th scope="col">Tâche</th>
-                        <th scope="col">Status</th>
+                        {/* <th scope="col">Status</th> */}
                         <th scope="col">Actions</th>
                       </tr>
                     </thead>
@@ -140,13 +140,13 @@ export default function ListItem() {
                             <td className="align-middle">
                               <span>{item.title}</span>
                             </td>
-                            <td className="align-middle">
+                            {/* <td className="align-middle">
                               <h6 className="mb-0">
                                 <span className="badge bg-success">
                                   Terminer
                                 </span>
                               </h6>
-                            </td>
+                            </td> */}
                             <td
                               className="align-middle"
                               onClick={() => viewDetails(item.id)}
@@ -209,7 +209,7 @@ export default function ListItem() {
                 <>
                   <ul className="list-group list-group-flush">
                     <li className="list-group-item">
-                      <h6>Objet : </h6> {selectedItem?.title}
+                      <h6>Object : </h6> {selectedItem?.title}
                     </li>
                     <li className="list-group-item">
                       <h6>Client : </h6> {selectedItem?.client}
@@ -219,7 +219,7 @@ export default function ListItem() {
                     </li>
 
                     <li className="list-group-item">
-                      <h6>Description : </h6> {selectedItem?.subject}
+                      <h6>Description : </h6> {selectedItem?.description}
                     </li>
 
                     <li className="list-group-item">
@@ -310,11 +310,11 @@ export default function ListItem() {
                         className="form-control"
                         id="exampleFormControlInput1"
                         placeholder="maintenance chez ifr...."
-                        defaultValue={selectedItem?.subject}
+                        defaultValue={selectedItem?.description}
                         onChange={(e) => {
                           const selectedValue =
                             e.target.value === undefined
-                              ? selectedItem?.subject
+                              ? selectedItem?.description
                               : e.target.value;
                           setDescription(selectedValue);
                         }}

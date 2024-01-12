@@ -1,74 +1,72 @@
 import React from "react";
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+import { useForm, SubmitHandler } from "react-hook-form";
 
 export default function AddTask() {
-  const [title, setTitle] = useState();
-  const [description, setDescription] = useState();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [recurrence, setRecurrence] = useState();
   const [date, setDate] = useState();
   const [technicien, setTechnicien] = useState();
-  const [client, setClient] = useState();
+  const [client, setClient] = useState("");
   const [allClients, setAllClients] = useState([]);
+  const [allGroup, setAllGroup] = useState([]);
+  const [group, setGroup] = useState();
+  const [list, setList] = useState([]);
+
+  ////----------------------Validation Fom---------------------////
+  const { register, handleSubmit, formState } = useForm({});
+
+  const { errors } = formState;
+
   ////---------------------Create task--------------------////
 
-  const makeTask = () => {
-    console.log("add Task");
-    console.log(date);
+  const makeTask = (data) => {
+    const selectedTech = data.technicien || list[0]?.name;
+    const selectedClient = data.client || allClients[0]?.name;
+    const selectedGroup = data.group || allGroup[0]?.name;
+
+    const findTechnicien = list.find((el) => {
+      return el.name == selectedTech;
+    });
+
+    const findClient = allClients.find((el) => {
+      return el.name == selectedClient;
+    });
+
+    const findGroup = allGroup.find((el) => {
+      return el.name == selectedGroup;
+    });
 
     const obj = {
-      title: title,
-      subject: description,
-      recurrence: recurrence,
-      technicien: technicien,
-      client: client,
+      title: data.title,
+      description: data.description,
+      recurrence: data.recurrence,
+      technicien: selectedTech,
+      client: selectedClient,
+      clientEmail: findClient?.email,
+      technicienEmail: findTechnicien?.email,
+      groupId: findGroup?.zammadId,
       status: 0,
     };
 
-    // console.log(obj);
-
-    // axios
-    //   .post("https://localhost:8000/api/tasks", obj, {
-    //     headers: {
-    //       "Content-Type": "application/ld+json",
-    //     },
-    //   })
-    //   .then((res) => {
-    //     console.log("Réponse du serveur :", res.data);
-    //     window.location = "/";
-    //   })
-    //   .catch((err) => {
-    //     console.error("Erreur lors de la requête :", err);
-    //   });
-
-    // crée ticket POST-Request sent: /api/v1/tickets
-    //     {
-    //       "title": "Help me!",
-    //       "group": "2nd Level",
-    //       "customer": "david@example.com",
-    //       "article": {
-    //          "subject": "My subject",
-    //          "body": "I am a message!",
-    //          "type": "note",
-    //          "internal": false
-    //       }
-    //    }
+    axios
+      .post("https://localhost:8000/api/tasks", obj, {
+        headers: {
+          "Content-Type": "application/ld+json",
+        },
+      })
+      .then((res) => {
+        console.log("Réponse du serveur :", res.data);
+        window.location = "/";
+      })
+      .catch((err) => {
+        console.error("Erreur lors de la requête :", err);
+      });
   };
 
   //--------------------------STATE-------------------------//
-  const [list, setList] = useState([]);
-
-  // useEffect(() => {
-  //   const fetchDatas = axios
-  //     .get("https://localhost:8000/api/techniciens")
-  //     .then((res) => {
-  //       const data = res.data["hydra:member"];
-  //       setList(data);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,8 +83,13 @@ export default function AddTask() {
           "https://localhost:8000/api/clients"
         );
         const clientsData = clientsRes.data["hydra:member"];
-        console.log(clientsData);
+        // console.log(clientsData);
         setAllClients(clientsData);
+
+        const groupRes = await axios.get("https://localhost:8000/api/groups");
+        const groupData = groupRes.data["hydra:member"];
+        // console.log(clientsData);
+        setAllGroup(groupData);
       } catch (err) {
         console.error("Erreur lors de la récupération des données:", err);
       }
@@ -95,11 +98,13 @@ export default function AddTask() {
     fetchData();
   }, []);
 
-  const initDefaultValue = useMemo(() => {
-    setTechnicien(list[0].name);
-    setClient(allClients[0].name);
-    console.log("init");
-  }, []);
+  //Initialisation par défaut des champs du formulaire
+  const initDefaultValue = () => {
+    setTechnicien(list[0]?.name);
+    setClient(allClients[0]?.name);
+    setGroup(allGroup[0]?.name);
+    setRecurrence(0);
+  };
 
   return (
     <>
@@ -110,7 +115,7 @@ export default function AddTask() {
         data-target="#exampleModal"
         onClick={initDefaultValue}
       >
-        Nouvelle tâche
+        Nouveau ticket
       </button>
 
       <div
@@ -125,11 +130,11 @@ export default function AddTask() {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="exampleModalLabel">
-                Nouvelle Tâche
+                Nouveau ticket
               </h5>
               <button
                 type="button"
-                className="close"
+                className="close btn btn-secondary"
                 data-dismiss="modal"
                 aria-label="Close"
               >
@@ -139,11 +144,31 @@ export default function AddTask() {
             <div className="modal-body">
               <form>
                 <div className="form-group">
-                  <label htmlFor="exampleFormControlSelect1">Technicien</label>
+                  <label htmlFor="exampleFormControlInput1">TITRE </label>
+                  <input
+                    {...register("title", { required: true })}
+                    type="text"
+                    className="form-control"
+                    id="exampleFormControlInput1"
+                    // placeholder="ifr..."
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                    }}
+                  />
+                  {errors.title && (
+                    <span style={{ color: "red" }}>
+                      Ce champ est obligatoire
+                    </span>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="exampleFormControlSelect1">TECHNICIEN</label>
                   <select
                     className="form-control"
                     id="exampleFormControlSelect1"
+                    value={technicien}
                     selected={list.length > 0 ? list[0].name : ""}
+                    {...register("technicien", { required: false })}
                     onChange={(e) => {
                       const selectedValue =
                         e.target.value === undefined
@@ -156,16 +181,23 @@ export default function AddTask() {
                       return <option key={item.id}> {item.name} </option>;
                     })}
                   </select>
+                  {errors.technicien && (
+                    <span style={{ color: "red" }}>
+                      Ce champ est obligatoire
+                    </span>
+                  )}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="exampleFormControlSelect1">Client</label>
+                  <label htmlFor="exampleFormControlSelect1">CLIENT</label>
                   <select
                     className="form-control"
                     id="exampleFormControlSelect1"
+                    value={client}
+                    {...register("client", { required: false })}
                     onChange={(e) => {
                       const selectedValue =
                         e.target.value === undefined
-                          ? list[0].name
+                          ? allClients[0].name
                           : e.target.value;
                       setClient(selectedValue);
                     }}
@@ -174,32 +206,55 @@ export default function AddTask() {
                       return <option key={item.id}> {item.name} </option>;
                     })}
                   </select>
+                  {errors.client && (
+                    <span style={{ color: "red" }}>
+                      Ce champ est obligatoire
+                    </span>
+                  )}
                 </div>
-
                 <div className="form-group">
-                  <label htmlFor="exampleFormControlInput1">Titre</label>
-                  <input
-                    type="text"
+                  <label htmlFor="exampleFormControlSelect1">GROUPE</label>
+                  <select
+                    value={client}
                     className="form-control"
-                    id="exampleFormControlInput1"
-                    placeholder="ifr..."
+                    id="exampleFormControlSelect1"
+                    {...register("group", { required: false })}
                     onChange={(e) => {
-                      setTitle(e.target.value);
+                      const selectedValue =
+                        e.target.value === undefined
+                          ? allGroup[0]?.name
+                          : e.target.value;
+                      setGroup(selectedValue);
                     }}
-                  />
+                  >
+                    {allGroup?.map((item) => {
+                      return <option key={item.id}> {item.name} </option>;
+                    })}
+                  </select>
+                  {errors.group && (
+                    <span style={{ color: "red" }}>
+                      Ce champ est obligatoire
+                    </span>
+                  )}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="exampleFormControlInput1">Description</label>
+                  <label htmlFor="exampleFormControlInput1">TEXTE</label>
                   <textarea
                     type="email"
                     className="form-control"
                     id="exampleFormControlInput1"
-                    placeholder="maintenance chez ifr...."
+                    {...register("description", { required: true })}
+                    // placeholder="maintenance chez ifr...."
                     onChange={(e) => {
                       setDescription(e.target.value);
                     }}
                   />
+                  {errors.description && (
+                    <span style={{ color: "red" }}>
+                      Ce champ est obligatoire
+                    </span>
+                  )}
                 </div>
                 {/* <div className="form-group">
                   <label htmlFor="exampleFormControlInput1">récurrence</label>
@@ -216,11 +271,12 @@ export default function AddTask() {
                   />
                 </div> */}
                 <div className="form-group">
-                  <label htmlFor="exampleFormControlInput1">récurrence</label>
+                  <label htmlFor="exampleFormControlInput1">RÉCCURRENCE</label>
                   <input
                     type="number"
                     className="form-control form-control-solid"
-                    placeholder="Choisissez le nombre de jours"
+                    // placeholder="Choisissez le nombre de jours"
+                    {...register("recurrence", { required: true })}
                     min="0"
                     max="100"
                     id="recurrence"
@@ -228,6 +284,11 @@ export default function AddTask() {
                       setRecurrence(e.target.value);
                     }}
                   />
+                  {errors.recurrence && (
+                    <span style={{ color: "red" }}>
+                      Ce champ est obligatoire
+                    </span>
+                  )}
                 </div>
               </form>
             </div>
@@ -242,9 +303,10 @@ export default function AddTask() {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={makeTask}
+                style={{ background: "#38ad69" }}
+                onClick={handleSubmit(makeTask)}
               >
-                Valider
+                Créer
               </button>
             </div>
           </div>
