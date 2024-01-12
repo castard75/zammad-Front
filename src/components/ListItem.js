@@ -73,7 +73,7 @@ export default function ListItem() {
           "https://localhost:8000/api/clients"
         );
         const clientsData = clientsRes.data["hydra:member"];
-        console.log(clientsData);
+
         setAllClients(clientsData);
 
         const groupRes = await axios.get("https://localhost:8000/api/groups");
@@ -94,7 +94,6 @@ export default function ListItem() {
     const findObjList = list.find((el) => el.id === id);
 
     setSelectedItem(findObjList);
-    console.log(findObjList);
 
     setShowModal(true);
     setTechnicien(findObjList.technicien);
@@ -115,9 +114,10 @@ export default function ListItem() {
 
   ////---------------HANDLE CHANGE----------------------////
 
-  const handleChange = () => {
-    const title = titleInputRef.current.value;
-    const description = descriptionInputRef.current.value;
+  const handleChange = (data) => {
+    const title = data.title;
+    const description = data.description;
+
     const recurrence = recurrenceInputRef.current.value;
     const selectedTech = technicienInputRef.current.value;
     const selectedClient = clientInputRef.current.value;
@@ -148,25 +148,26 @@ export default function ListItem() {
     };
     console.log(obj);
 
-    axios
-      .put(`https://localhost:8000/api/tasks/${selectedItem.id}`, obj, {
-        headers: {
-          "Content-Type": "application/ld+json",
-        },
-      })
-      .then((response) => {
-        console.log(response.data);
-        window.location = "/";
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    // axios
+    //   .put(`https://localhost:8000/api/tasks/${selectedItem.id}`, obj, {
+    //     headers: {
+    //       "Content-Type": "application/ld+json",
+    //     },
+    //   })
+    //   .then((response) => {
+    //     console.log(response.data);
+    //     window.location = "/";
+    //   })
+    //   .catch((error) => {
+    //     console.error(error);
+    //   });
   };
 
   return (
     <>
       <section className="vh-100 gradient-custom-2">
         <div className="container py-5 ">
+          {" "}
           <div className="row d-flex justify-content-center align-items-center h-100">
             <div className="col-md-12 col-xl-10">
               <div className="card mask-custom">
@@ -308,11 +309,11 @@ export default function ListItem() {
                     <li className="list-group-item">
                       <h6 htmlFor="exampleFormControlSelect1">Titre</h6>
                       <input
+                        {...register("title", { required: true })}
                         type="text"
                         className="form-control"
                         id="exampleFormControlInput1"
-                        ref={titleInputRef}
-                        placeholder="ifr..."
+                        // ref={titleInputRef}
                         defaultValue={selectedItem?.title}
                         onChange={(e) => {
                           const selectedValue =
@@ -322,7 +323,13 @@ export default function ListItem() {
                           setTitle(selectedValue);
                         }}
                       />
+                      {errors.title && (
+                        <span style={{ color: "red" }}>
+                          Ce champ est obligatoire
+                        </span>
+                      )}
                     </li>
+
                     <li className="list-group-item">
                       <h6 htmlFor="exampleFormControlSelect1">Technicien</h6>
                       <select
@@ -346,7 +353,7 @@ export default function ListItem() {
                       </select>
                     </li>
                     <li className="list-group-item">
-                      <label htmlFor="exampleFormControlSelect1">Client</label>
+                      <h6 htmlFor="exampleFormControlSelect1">Client</h6>
                       <select
                         className="form-control"
                         id="exampleFormControlSelect1"
@@ -370,7 +377,7 @@ export default function ListItem() {
                       </select>
                     </li>
                     <li className="list-group-item">
-                      <label htmlFor="exampleFormControlSelect1">Group</label>
+                      <h6 htmlFor="exampleFormControlSelect1">Groupe</h6>
                       <select
                         className="form-control"
                         id="exampleFormControlSelect1"
@@ -394,13 +401,13 @@ export default function ListItem() {
                       </select>
                     </li>
                     <li className="list-group-item">
-                      <h6 htmlFor="exampleFormControlInput1">Description</h6>
+                      <h6 htmlFor="exampleFormControlInput1">Texte</h6>
                       <textarea
                         type="email"
                         className="form-control"
                         id="exampleFormControlInput1"
-                        placeholder="maintenance chez ifr...."
-                        ref={descriptionInputRef}
+                        {...register("description", { required: true })}
+                        // ref={descriptionInputRef}
                         defaultValue={selectedItem?.description}
                         onChange={(e) => {
                           const selectedValue =
@@ -410,9 +417,15 @@ export default function ListItem() {
                           setDescription(selectedValue);
                         }}
                       />
+                      {errors.description && (
+                        <span style={{ color: "red" }}>
+                          Ce champ est obligatoire
+                        </span>
+                      )}
                     </li>
+
                     <li className="list-group-item">
-                      <h6 htmlFor="exampleFormControlInput1">récurrence</h6>
+                      <h6 htmlFor="exampleFormControlInput1">Récurrence</h6>
                       <input
                         type="number"
                         className="form-control form-control-solid"
@@ -442,10 +455,11 @@ export default function ListItem() {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-primary"
-                      onClick={handleChange}
+                      className="btn "
+                      style={{ background: "#38ad69" }}
+                      onClick={handleSubmit(handleChange)}
                     >
-                      Valider Modification
+                      Valider
                     </button>
                   </div>
                 </>

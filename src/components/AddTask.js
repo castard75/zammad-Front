@@ -112,7 +112,8 @@ export default function AddTask() {
     <>
       <button
         type="button"
-        className="btn btn-light"
+        className="btn "
+        style={{ background: "#38ad69" }}
         data-toggle="modal"
         data-target="#exampleModal"
         onClick={initDefaultValue}
