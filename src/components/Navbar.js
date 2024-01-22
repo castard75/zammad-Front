@@ -4,10 +4,7 @@ import AddTask from "./AddTask";
 export default function Navbar() {
   return (
     <>
-      <nav
-        className="navbar navbar-expand-lg "
-        style={{ background: "hsl(230deg 4.27% 21.6%)" }}
-      >
+      <nav className="navbar navbar-expand-lg navbar-light bg-body-tertiary">
         <div className="container-fluid">
           <button
             data-mdb-collapse-init
@@ -22,13 +19,9 @@ export default function Navbar() {
           </button>
 
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <span
-              className="navbar-brand mt-2 mt-lg-0"
-              href="#"
-              style={{ color: "#fff" }}
-            >
+            <a className="navbar-brand mt-2 mt-lg-0" href="#">
               Nixia
-            </span>
+            </a>
 
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               {/* <li className="nav-item">

@@ -2,8 +2,15 @@ import React from "react";
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useContext } from "react";
+import { AppContext } from "../App";
 
 export default function ListItem() {
+  ////-----------------USE CONTEXT -------------------------////
+  const { allTechnicienContext, setAllTechnienContext } =
+    useContext(AppContext);
+
+  // console.log(allTechnicienContext);
   const [list, setList] = useState([]);
   const [showModal, setShowModal] = useState(false); // New state for controlling modal visibility
   const [selectedItem, setSelectedItem] = useState(null); // New state to store the selected item
@@ -49,7 +56,12 @@ export default function ListItem() {
       .get("https://localhost:8000/api/tasks")
       .then((res) => {
         const data = res.data["hydra:member"];
-        setList(data);
+
+        const taskActiv = data.filter((elements) => {
+          return elements.deletedAt == null;
+        });
+
+        setList(taskActiv);
       })
       .catch((err) => {
         console.log(err);
@@ -148,21 +160,79 @@ export default function ListItem() {
     };
     console.log(obj);
 
-    // axios
-    //   .put(`https://localhost:8000/api/tasks/${selectedItem.id}`, obj, {
-    //     headers: {
-    //       "Content-Type": "application/ld+json",
-    //     },
-    //   })
-    //   .then((response) => {
-    //     console.log(response.data);
-    //     window.location = "/";
-    //   })
-    //   .catch((error) => {
-    //     console.error(error);
-    //   });
+    axios
+      .put(`https://localhost:8000/api/tasks/${selectedItem.id}`, obj, {
+        headers: {
+          "Content-Type": "application/ld+json",
+        },
+      })
+      .then((response) => {
+        console.log(response.data);
+        window.location = "/";
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
+  ////----------------------DELETE-----------------------////
+
+  const handleDelete = (e, id) => {
+    e.preventDefault();
+
+    const idToDelete = id;
+
+    ///---------gestion Modif---------------////
+
+    let findItem = list.find((item) => {
+      return item.id == id;
+    });
+    console.log(findItem);
+    let dates = new Date();
+    const iso = dates.toISOString();
+    const hours = iso.split("T")[1].split(".")[0];
+
+    const date = iso.split("T")[0];
+    const finalDate = date + " " + hours;
+
+    const objToPut = {
+      title: findItem.title,
+      description: findItem.description,
+      recurrence: findItem.recurrence,
+      ponctuel: findItem.ponctuel,
+      technicien: findItem.technicien,
+      client: findItem.client,
+      subject: findItem.subject,
+      groupZad: findItem.groupZad,
+      createdAt: findItem.createdAt,
+      deletedAt: finalDate,
+      updatedAt: finalDate,
+      status: findItem.status,
+      transfert: 0,
+      clientEmail: findItem.clientEmail,
+      technicienEmail: findItem.technicienEmail,
+      groupId: findItem.groupId,
+    };
+
+    axios
+      .put(`https://localhost:8000/api/tasks/${idToDelete}`, objToPut, {
+        headers: {
+          "Content-Type": "application/ld+json",
+        },
+      })
+      .then((response) => {
+        console.log(response.data);
+        const newList = list.filter((element) => {
+          return element.id !== idToDelete;
+        });
+
+        setList(newList);
+        // window.location = "/";
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
   return (
     <>
       <section className="vh-100 gradient-custom-2">
@@ -180,6 +250,7 @@ export default function ListItem() {
                         <th scope="col">Tâche</th>
                         {/* <th scope="col">Status</th> */}
                         <th scope="col">Actions</th>
+                        <th scope="col">Désactivé</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -207,6 +278,7 @@ export default function ListItem() {
                                 </span>
                               </h6>
                             </td> */}
+
                             <td
                               className="align-middle"
                               onClick={() => viewDetails(item.id)}
@@ -218,6 +290,15 @@ export default function ListItem() {
                                 data-target="#detail"
                               >
                                 details
+                              </button>
+                            </td>
+                            <td className="align-middle">
+                              <button
+                                type="button"
+                                className="btn btn-danger"
+                                onClick={(e) => handleDelete(e, item.id)}
+                              >
+                                <i class="bi bi-trash3-fill"></i>
                               </button>
                             </td>
                           </tr>
