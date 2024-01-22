@@ -4,6 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useContext } from "react";
 import { AppContext } from "../App";
+import ReactPaginate from "react-paginate"; // for pagination
+
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 
 export default function ListItem() {
   ////-----------------USE CONTEXT -------------------------////
@@ -34,6 +38,9 @@ export default function ListItem() {
     client: "",
     status: 0,
   });
+
+  ///-------------Search------------///
+  const [search, setSearch] = useState("");
 
   ////-------------------------REF----------------------////
 
@@ -182,8 +189,6 @@ export default function ListItem() {
 
     const idToDelete = id;
 
-    ///---------gestion Modif---------------////
-
     let findItem = list.find((item) => {
       return item.id == id;
     });
@@ -233,79 +238,149 @@ export default function ListItem() {
         console.error(error);
       });
   };
+
+  const [page, setPage] = useState(0);
+  const [filterData, setFilterData] = useState([]);
+  const n = 3;
+
+  useEffect(() => {
+    setFilterData(
+      list.filter((item, index) => {
+        return (index >= page * n) & (index < (page + 1) * n);
+      })
+    );
+  }, [page]);
+
+  // const active = {
+  //   backgroundColor: "#1e50ff",
+  //   borderRadius: "50%",
+  // };
+
+  // const CustomStyles = {
+  //   listStyle: "none",
+  //   padding: "2px 12px",
+  //   height: "31.5px",
+  //   width: "31.5px",
+  //   display: "flex",
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   marginTop: "2px",
+  // };
+
+  // const pagination = {
+  //   listStyle: "none",
+  //   height: "31.5px",
+  //   width: "31.5px",
+  //   display: "flex",
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   marginTop: "2px",
+  //   cursor: "pointer",
+  // };
+
   return (
     <>
-      <section className="vh-100 gradient-custom-2">
+      <section className="vh-100 gradient-custom-2 test">
         <div className="container py-5 ">
           {" "}
           <div className="row d-flex justify-content-center align-items-center h-100">
             <div className="col-md-12 col-xl-10">
               <div className="card mask-custom">
                 <div className="card-body p-4 text-white">
+                  <div
+                    className=" mb-2"
+                    style={{ paddingRight: "1rem", width: "300px" }}
+                  >
+                    <i className="ki-outline ki-magnifier fs-3 text-primary position-absolute top-50 translate-middle ms-9"></i>
+
+                    <input
+                      style={{ paddingRight: "1rem", width: "200px" }}
+                      type="text"
+                      className="form-control form-control-sm form-control-lg form-control-solid ps-14"
+                      name="search"
+                      id="ZoneRechercheTableTiers"
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Recherche"
+                    />
+                  </div>
                   <table className="table text-white mb-0">
                     <thead>
                       <tr>
                         <th scope="col">Technicien</th>
                         <th scope="col">Client</th>
                         <th scope="col">Tâche</th>
-                        {/* <th scope="col">Status</th> */}
                         <th scope="col">Actions</th>
                         <th scope="col">Désactivé</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {list?.map((item) => {
-                        return (
-                          <tr className="fw-normal" key={item.id}>
-                            <th>
-                              <img
-                                src="./assets/images/logo.png"
-                                alt="avatar 1"
-                                style={{ width: "45px", height: "auto" }}
-                              />
-                              <span className="ms-2">{item.technicien}</span>
-                            </th>
-                            <td className="align-middle">
-                              <span>{item.client}</span>
-                            </td>
-                            <td className="align-middle">
-                              <span>{item.title}</span>
-                            </td>
-                            {/* <td className="align-middle">
-                              <h6 className="mb-0">
-                                <span className="badge bg-success">
-                                  Terminer
-                                </span>
-                              </h6>
-                            </td> */}
+                      {filterData
+                        ?.filter((item) => {
+                          return search.toLowerCase() === ""
+                            ? item
+                            : item.client.toLowerCase().includes(search);
+                        })
+                        .map((item) => {
+                          return (
+                            <tr className="fw-normal" key={item.id}>
+                              <th>
+                                <img
+                                  src="./assets/images/logo.png"
+                                  alt="avatar 1"
+                                  style={{ width: "45px", height: "auto" }}
+                                />
+                                <span className="ms-2">{item.technicien}</span>
+                              </th>
+                              <td className="align-middle">
+                                <span>{item.client}</span>
+                              </td>
+                              <td className="align-middle">
+                                <span>{item.title}</span>
+                              </td>
 
-                            <td
-                              className="align-middle"
-                              onClick={() => viewDetails(item.id)}
-                            >
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                data-toggle="modal"
-                                data-target="#detail"
+                              <td
+                                className="align-middle"
+                                onClick={() => viewDetails(item.id)}
                               >
-                                details
-                              </button>
-                            </td>
-                            <td className="align-middle">
-                              <button
-                                type="button"
-                                className="btn btn-danger"
-                                onClick={(e) => handleDelete(e, item.id)}
-                              >
-                                <i class="bi bi-trash3-fill"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                                <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  data-toggle="modal"
+                                  data-target="#detail"
+                                >
+                                  details
+                                </button>
+                              </td>
+                              <td className="align-middle">
+                                <button
+                                  type="button"
+                                  className="btn btn-danger"
+                                  onClick={(e) => handleDelete(e, item.id)}
+                                >
+                                  <i class="bi bi-trash3-fill"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                     </tbody>
                   </table>
+                  <div
+                    style={{ display: "flex", justifyContent: "flex-start" }}
+                  >
+                    <ReactPaginate
+                      containerClassName={"pagination"}
+                      pageClassName={"CustomStyles"}
+                      activeClassName={"active"}
+                      onPageChange={(event) => setPage(event.selected)}
+                      pageCount={Math.ceil(list.length / n)}
+                      breakLabel="..."
+                      previousLabel={"précédent"}
+                      nextLabel={"suivant"}
+                      marginPagesDisplayed={2}
+                      nextClassName={"item  "}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
